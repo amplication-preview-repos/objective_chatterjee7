@@ -1,0 +1,97 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Appointment {
+  appointmentTime DateTime?
+  barber          String?
+  createdAt       DateTime               @default(now())
+  customer        String?
+  id              String                 @id @default(cuid())
+  payments        Payment[]
+  reviews         Review[]
+  service         Service?               @relation(fields: [serviceId], references: [id])
+  serviceId       String?
+  status          EnumAppointmentStatus?
+  updatedAt       DateTime               @updatedAt
+}
+
+model Service {
+  appointments Appointment[]
+  barber       String?
+  createdAt    DateTime      @default(now())
+  description  String?
+  id           String        @id @default(cuid())
+  price        Float?
+  serviceName  String?
+  updatedAt    DateTime      @updatedAt
+}
+
+model Subscription {
+  createdAt        DateTime                          @default(now())
+  endDate          DateTime?
+  id               String                            @id @default(cuid())
+  isActive         Boolean?
+  startDate        DateTime?
+  subscriptionPlan EnumSubscriptionSubscriptionPlan?
+  updatedAt        DateTime                          @updatedAt
+  user             User?                             @relation(fields: [userId], references: [id])
+  userId           String?
+}
+
+model Payment {
+  amount        Float?
+  appointment   Appointment?              @relation(fields: [appointmentId], references: [id])
+  appointmentId String?
+  createdAt     DateTime                  @default(now())
+  id            String                    @id @default(cuid())
+  paymentMethod EnumPaymentPaymentMethod?
+  paymentStatus EnumPaymentPaymentStatus?
+  updatedAt     DateTime                  @updatedAt
+}
+
+model Review {
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+  appointmentId String?
+  comment       String?
+  createdAt     DateTime     @default(now())
+  id            String       @id @default(cuid())
+  rating        Int?
+  updatedAt     DateTime     @updatedAt
+}
+
+model User {
+  createdAt     DateTime       @default(now())
+  email         String?        @unique
+  firstName     String?
+  id            String         @id @default(cuid())
+  isBarber      Boolean?
+  lastName      String?
+  location      String?
+  password      String
+  roles         Json
+  subscriptions Subscription[]
+  updatedAt     DateTime       @updatedAt
+  username      String         @unique
+}
+
+enum EnumAppointmentStatus {
+  Option1
+}
+
+enum EnumSubscriptionSubscriptionPlan {
+  Option1
+}
+
+enum EnumPaymentPaymentMethod {
+  Option1
+}
+
+enum EnumPaymentPaymentStatus {
+  Option1
+}
